@@ -11,7 +11,14 @@ namespace Monitor_de_Alteração_em_Texto
 
         public DataManager()
         {
-            Connection = new SQLiteConnection("Data Source=hello.db;Version=3;");
+            // Set database path in the user's AppData directory
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string appName = "MonitorAlteracaoTexto";
+            string dbDirectory = Path.Combine(appDataPath, appName);
+            Directory.CreateDirectory(dbDirectory); // Ensure directory exists
+            string dbPath = Path.Combine(dbDirectory, "hello.db");
+
+            Connection = new SQLiteConnection($"Data Source={dbPath};Version=3;");
             Connection.Open();
             CreateTablesIfNotExists();
         }
