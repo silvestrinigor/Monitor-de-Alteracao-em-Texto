@@ -12,7 +12,7 @@ Este projeto faz parte de um **desafio técnico** para avaliação de habilidade
 
 ## 📝 Instalação
 
-A versão mais recente pode ser baixada em [Releases](https://github.com/silvestrinigor/MonitorAlteracaoEmTexto/releases/tag/1.2).
+A versão mais recente pode ser baixada em [Releases](https://github.com/silvestrinigor/MonitorAlteracaoEmTexto/releases/tag/1.3).
 
 ### Requisitos
 
