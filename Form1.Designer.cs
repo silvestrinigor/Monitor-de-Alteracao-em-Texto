@@ -56,7 +56,7 @@
             FileChangeHistoryTextBox.Location = new Point(80, 50);
             FileChangeHistoryTextBox.Name = "FileChangeHistoryTextBox";
             FileChangeHistoryTextBox.ReadOnly = true;
-            FileChangeHistoryTextBox.Size = new Size(708, 259);
+            FileChangeHistoryTextBox.Size = new Size(708, 240);
             FileChangeHistoryTextBox.TabIndex = 2;
             FileChangeHistoryTextBox.Text = "";
             // 
@@ -72,7 +72,7 @@
             LogsTextBox.Location = new Point(80, 3);
             LogsTextBox.Name = "LogsTextBox";
             LogsTextBox.ReadOnly = true;
-            LogsTextBox.Size = new Size(708, 129);
+            LogsTextBox.Size = new Size(708, 110);
             LogsTextBox.TabIndex = 5;
             LogsTextBox.Text = "";
             // 
@@ -150,9 +150,9 @@
             panel3.Controls.Add(label2);
             panel3.Controls.Add(LogsTextBox);
             panel3.Dock = DockStyle.Bottom;
-            panel3.Location = new Point(0, 312);
+            panel3.Location = new Point(0, 293);
             panel3.Name = "panel3";
-            panel3.Size = new Size(800, 138);
+            panel3.Size = new Size(800, 157);
             panel3.TabIndex = 6;
             // 
             // panel5
