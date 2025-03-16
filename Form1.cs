@@ -85,7 +85,6 @@ namespace Monitor_de_Alteração_em_Texto
                     if (line.Position != null)
                     {
                         linesInUse.Add(line.Position.Value);
-                        AddLogInfoInTextBox($"Line in use {line.Position}", "DEBUG");
                     }
                     TextFileLineInfo? textFileLineInfo;
                     string newLineChangeInfo;
@@ -122,23 +121,22 @@ namespace Monitor_de_Alteração_em_Texto
                             break;
 
                         case ChangeType.Deleted:
-                            newLineChangeInfo = $"- {line.Text}\n"; // Add +1 for line numbering
+                            newLineChangeInfo = $" - {line.Text}\n"; // Add +1 for line numbering
                             FileChangeHistoryTextBox.AppendText(newLineChangeInfo);
                             FileChangeHistoryTextBox.SelectionStart = FileChangeHistoryTextBox.Text.Length - newLineChangeInfo.Length;
                             FileChangeHistoryTextBox.SelectionLength = newLineChangeInfo.Length;
                             FileChangeHistoryTextBox.SelectionColor = Color.Red;
-                            AddLogInfoInTextBox(lastPosition.ToString(), "DEBUG");
                             textFileLineInfo = TextFileInfo.GetTextLineInfoByLineNumber(lastPosition + 1);
                             lastPosition++;
                             if (textFileLineInfo != null)
                             {
-                                AddLogInfoInTextBox($"deleting line {textFileLineInfo.LineNumber}, {textFileLineInfo.Content}", "DEBUG");
+                                AddLogInfoInTextBox($"Deletando linha {textFileLineInfo.LineNumber}", "DEBUG");
                                 textFileLineInfo.DeleteLine();
                             }
                             break;
 
                         default:
-                            newLineChangeInfo = $"{line.Position}  {line.Text}\n";
+                            newLineChangeInfo = $"{line.Position} {line.Text}\n";
                             FileChangeHistoryTextBox.AppendText(newLineChangeInfo);
                             FileChangeHistoryTextBox.SelectionStart = FileChangeHistoryTextBox.Text.Length - newLineChangeInfo.Length;
                             FileChangeHistoryTextBox.SelectionLength = newLineChangeInfo.Length;
@@ -178,7 +176,8 @@ namespace Monitor_de_Alteração_em_Texto
                     {
                         if (!linesInUse.Contains(lineInfo.LineNumber))
                         {
-                            AddLogInfoInTextBox($"Line deleted in data {lineInfo.LineNumber}", "DEBUG");
+                            // If, for some reasong, the line was not deleted, force it
+                            AddLogInfoInTextBox($"Deletando linha {lineInfo.LineNumber}", "DEBUG");
                             lineInfo.DeleteLine();
                         }
                     }
@@ -206,33 +205,8 @@ namespace Monitor_de_Alteração_em_Texto
                 TextFileInfo.DeleteTextFileInfo();
                 FilePathTextBox.Text = "";
                 TextFileInfo = null;
-                AddLogInfoInTextBox("Todas as linhas do arquivo foram deletadas", "DEBUG");
+                AddLogInfoInTextBox("Todas as tabelas referente ao arquivo foram deletadas", "DEBUG");
             }
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void panel2_Paint(object sender, PaintEventArgs e)
-        {
-
         }
     }
 }

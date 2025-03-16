@@ -95,7 +95,6 @@
             label2.Size = new Size(32, 15);
             label2.TabIndex = 4;
             label2.Text = "Logs";
-            label2.Click += label2_Click;
             // 
             // label1
             // 
@@ -105,7 +104,6 @@
             label1.Size = new Size(62, 15);
             label1.TabIndex = 3;
             label1.Text = "Alteracoes";
-            label1.Click += label1_Click;
             // 
             // SelectFileButton
             // 
@@ -146,7 +144,6 @@
             panel2.Name = "panel2";
             panel2.Size = new Size(800, 450);
             panel2.TabIndex = 12;
-            panel2.Paint += panel2_Paint;
             // 
             // panel3
             // 
@@ -187,7 +184,6 @@
             MinimumSize = new Size(816, 489);
             Name = "Form1";
             Text = "Monitor de Alteração em Texto";
-            Load += Form1_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             panel2.ResumeLayout(false);
