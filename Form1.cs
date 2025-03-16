@@ -138,7 +138,7 @@ namespace Monitor_de_Alteração_em_Texto
                             break;
 
                         default:
-                            newLineChangeInfo = $"{line.Position} = {line.Text}\n";
+                            newLineChangeInfo = $"{line.Position}  {line.Text}\n";
                             FileChangeHistoryTextBox.AppendText(newLineChangeInfo);
                             FileChangeHistoryTextBox.SelectionStart = FileChangeHistoryTextBox.Text.Length - newLineChangeInfo.Length;
                             FileChangeHistoryTextBox.SelectionLength = newLineChangeInfo.Length;
@@ -226,6 +226,11 @@ namespace Monitor_de_Alteração_em_Texto
         }
 
         private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel2_Paint(object sender, PaintEventArgs e)
         {
 
         }

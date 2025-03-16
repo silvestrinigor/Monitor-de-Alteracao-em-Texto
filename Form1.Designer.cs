@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             FileChangeHistoryTextBox = new RichTextBox();
             TimerToVerifyFile = new System.Windows.Forms.Timer(components);
             LogsTextBox = new RichTextBox();
@@ -40,18 +41,22 @@
             FilePathTextBox = new TextBox();
             panel2 = new Panel();
             panel3 = new Panel();
+            panel5 = new Panel();
             panel4 = new Panel();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
+            panel3.SuspendLayout();
+            panel5.SuspendLayout();
             panel4.SuspendLayout();
             SuspendLayout();
             // 
             // FileChangeHistoryTextBox
             // 
-            FileChangeHistoryTextBox.Location = new Point(134, 56);
+            FileChangeHistoryTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            FileChangeHistoryTextBox.Location = new Point(80, 50);
             FileChangeHistoryTextBox.Name = "FileChangeHistoryTextBox";
             FileChangeHistoryTextBox.ReadOnly = true;
-            FileChangeHistoryTextBox.Size = new Size(654, 211);
+            FileChangeHistoryTextBox.Size = new Size(708, 259);
             FileChangeHistoryTextBox.TabIndex = 2;
             FileChangeHistoryTextBox.Text = "";
             // 
@@ -63,17 +68,18 @@
             // 
             // LogsTextBox
             // 
-            LogsTextBox.Location = new Point(134, 276);
+            LogsTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            LogsTextBox.Location = new Point(80, 3);
             LogsTextBox.Name = "LogsTextBox";
             LogsTextBox.ReadOnly = true;
-            LogsTextBox.Size = new Size(651, 128);
+            LogsTextBox.Size = new Size(708, 129);
             LogsTextBox.TabIndex = 5;
             LogsTextBox.Text = "";
             // 
             // button1
             // 
             button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            button1.Location = new Point(687, 6);
+            button1.Location = new Point(690, 6);
             button1.Name = "button1";
             button1.Size = new Size(98, 23);
             button1.TabIndex = 6;
@@ -84,7 +90,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(96, 276);
+            label2.Location = new Point(42, 3);
             label2.Name = "label2";
             label2.Size = new Size(32, 15);
             label2.TabIndex = 4;
@@ -94,7 +100,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(66, 3);
+            label1.Location = new Point(12, 6);
             label1.Name = "label1";
             label1.Size = new Size(62, 15);
             label1.TabIndex = 3;
@@ -103,7 +109,7 @@
             // 
             // SelectFileButton
             // 
-            SelectFileButton.Location = new Point(12, 12);
+            SelectFileButton.Location = new Point(12, 15);
             SelectFileButton.Name = "SelectFileButton";
             SelectFileButton.Size = new Size(116, 23);
             SelectFileButton.TabIndex = 0;
@@ -118,12 +124,13 @@
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(800, 47);
+            panel1.Size = new Size(800, 41);
             panel1.TabIndex = 11;
             // 
             // FilePathTextBox
             // 
-            FilePathTextBox.Location = new Point(134, 12);
+            FilePathTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            FilePathTextBox.Location = new Point(134, 16);
             FilePathTextBox.Name = "FilePathTextBox";
             FilePathTextBox.ReadOnly = true;
             FilePathTextBox.Size = new Size(654, 23);
@@ -131,23 +138,39 @@
             // 
             // panel2
             // 
-            panel2.Controls.Add(label1);
-            panel2.Location = new Point(0, 53);
+            panel2.Controls.Add(panel3);
+            panel2.Controls.Add(FileChangeHistoryTextBox);
+            panel2.Controls.Add(panel5);
+            panel2.Dock = DockStyle.Fill;
+            panel2.Location = new Point(0, 0);
             panel2.Name = "panel2";
-            panel2.Size = new Size(800, 217);
+            panel2.Size = new Size(800, 450);
             panel2.TabIndex = 12;
+            panel2.Paint += panel2_Paint;
             // 
             // panel3
             // 
-            panel3.Location = new Point(0, 273);
+            panel3.Controls.Add(label2);
+            panel3.Controls.Add(LogsTextBox);
+            panel3.Dock = DockStyle.Bottom;
+            panel3.Location = new Point(0, 312);
             panel3.Name = "panel3";
-            panel3.Size = new Size(800, 137);
-            panel3.TabIndex = 13;
+            panel3.Size = new Size(800, 138);
+            panel3.TabIndex = 6;
+            // 
+            // panel5
+            // 
+            panel5.Controls.Add(label1);
+            panel5.Location = new Point(0, 44);
+            panel5.Name = "panel5";
+            panel5.Size = new Size(800, 365);
+            panel5.TabIndex = 7;
             // 
             // panel4
             // 
             panel4.Controls.Add(button1);
-            panel4.Location = new Point(0, 410);
+            panel4.Dock = DockStyle.Bottom;
+            panel4.Location = new Point(0, 409);
             panel4.Name = "panel4";
             panel4.Size = new Size(800, 41);
             panel4.TabIndex = 14;
@@ -157,13 +180,10 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(FileChangeHistoryTextBox);
-            Controls.Add(LogsTextBox);
-            Controls.Add(label2);
+            Controls.Add(panel4);
             Controls.Add(panel1);
             Controls.Add(panel2);
-            Controls.Add(panel3);
-            Controls.Add(panel4);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MinimumSize = new Size(816, 489);
             Name = "Form1";
             Text = "Monitor de Alteração em Texto";
@@ -171,10 +191,12 @@
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             panel2.ResumeLayout(false);
-            panel2.PerformLayout();
+            panel3.ResumeLayout(false);
+            panel3.PerformLayout();
+            panel5.ResumeLayout(false);
+            panel5.PerformLayout();
             panel4.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
@@ -188,7 +210,8 @@
         private Panel panel1;
         private TextBox FilePathTextBox;
         private Panel panel2;
-        private Panel panel3;
         private Panel panel4;
+        private Panel panel3;
+        private Panel panel5;
     }
 }
