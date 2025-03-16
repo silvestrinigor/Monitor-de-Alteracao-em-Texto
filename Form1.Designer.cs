@@ -78,7 +78,7 @@
             // TimerToVerifyFile
             // 
             TimerToVerifyFile.Enabled = true;
-            TimerToVerifyFile.Interval = 5000;
+            TimerToVerifyFile.Interval = 30000;
             TimerToVerifyFile.Tick += OnTimerToVerifyFileTick;
             // 
             // label2
@@ -101,11 +101,11 @@
             // 
             // button1
             // 
-            button1.Location = new Point(12, 415);
+            button1.Location = new Point(30, 415);
             button1.Name = "button1";
-            button1.Size = new Size(75, 23);
+            button1.Size = new Size(98, 23);
             button1.TabIndex = 6;
-            button1.Text = "button1";
+            button1.Text = "Deletar tabela";
             button1.UseVisualStyleBackColor = true;
             button1.Click += OnCleanTableButtonClick;
             // 

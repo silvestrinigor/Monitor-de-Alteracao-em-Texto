@@ -17,7 +17,6 @@ namespace Monitor_de_Alteração_em_Texto
     public class TextFileInfo
     {
         private string? _path;
-        private List<TextFileLineInfo>? _lines;
         private SQLiteConnection Connection { get; set; }
         public int Id { get; private set; }
         public bool IsDeleted { get; set; } // Local property, not stored in DB
@@ -141,9 +140,11 @@ namespace Monitor_de_Alteração_em_Texto
                 var currentLine = orderedLines[i];
                 if (currentLine.Content == null)
                     continue;
-                content.AppendLine(currentLine.Content);
+                if(i == orderedLines.Count - 1)
+                    content.Append(currentLine.Content);
+                else
+                    content.AppendLine(currentLine.Content);
             }
-            //content.Remove(content.Length - 2, 2); // Remove the last newline
             return content.ToString();
         }
         public TextFileLineInfo CreateTextLineInfo(int lineNumber, string content)

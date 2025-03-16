@@ -43,6 +43,7 @@ namespace Monitor_de_Alteração_em_Texto
                     TextFileInfo = DataAccess.GetTextFileInfo(textFileInfoId.Value);
                     AddLogInfoInTextBox($"Carregado informacoes em banco do arquivo {openFileDialog.FileName}", "DEBUG");
                 }
+                UpdateFileContentInTextBoxAndData();
             }
             else
             {
@@ -51,6 +52,11 @@ namespace Monitor_de_Alteração_em_Texto
         }
 
         private void OnTimerToVerifyFileTick(object sender, EventArgs e)
+        {
+            UpdateFileContentInTextBoxAndData();
+        }
+
+        private void UpdateFileContentInTextBoxAndData()
         {
             if (TextFileInfo == null)
             {
@@ -166,13 +172,15 @@ namespace Monitor_de_Alteração_em_Texto
                     FileChangeHistoryTextBox.SelectionLength = 0;
                 }
                 TextFileInfo.LoadInfos();
-                foreach (var lineInfo in TextFileInfo.Lines)
+                if (TextFileInfo.Lines != null)
                 {
-                    if (!linesInUse.Contains(lineInfo.LineNumber))
+                    foreach (var lineInfo in TextFileInfo.Lines)
                     {
-
-                        AddLogInfoInTextBox($"Line deleted in data {lineInfo.LineNumber}", "DEBUG");
-                        lineInfo.DeleteLine();
+                        if (!linesInUse.Contains(lineInfo.LineNumber))
+                        {
+                            AddLogInfoInTextBox($"Line deleted in data {lineInfo.LineNumber}", "DEBUG");
+                            lineInfo.DeleteLine();
+                        }
                     }
                 }
             }));
@@ -194,6 +202,7 @@ namespace Monitor_de_Alteração_em_Texto
         {
             if(TextFileInfo != null)
             {
+                FileChangeHistoryTextBox.Clear();
                 TextFileInfo.DeleteTextFileInfo();
                 FilePathTextBox.Text = "";
                 TextFileInfo = null;
