@@ -5,11 +5,11 @@ using System.Linq;
 
 namespace Monitor_de_Alteração_em_Texto
 {
-    public class DatabaseManager : IDisposable
+    public class DataManager : IDisposable
     {
         public SQLiteConnection Connection { get; private set; }
 
-        public DatabaseManager()
+        public DataManager()
         {
             Connection = new SQLiteConnection("Data Source=hello.db;Version=3;");
             Connection.Open();

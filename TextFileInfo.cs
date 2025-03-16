@@ -8,6 +8,10 @@ using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Monitor_de_Alteração_em_Texto
 {
     public class TextFileInfo
@@ -16,10 +20,24 @@ namespace Monitor_de_Alteração_em_Texto
         private List<TextFileLineInfo>? _lines;
         private SQLiteConnection Connection { get; set; }
         public int Id { get; private set; }
+        public bool IsDeleted { get; set; } // Local property, not stored in DB
 
         public string? Path
         {
-            get => _path;
+            get
+            {
+                if (_path == null && Connection != null && Id > 0)
+                {
+                    string query = "SELECT Path FROM TextFileInfo WHERE Id = @Id";
+                    using (var command = new SQLiteCommand(query, Connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", Id);
+                        var result = command.ExecuteScalar();
+                        _path = result != DBNull.Value && result != null ? result.ToString() : string.Empty;
+                    }
+                }
+                return _path;
+            }
             set
             {
                 if (Connection != null && Id > 0 && !string.Equals(_path, value, StringComparison.Ordinal))
@@ -28,16 +46,7 @@ namespace Monitor_de_Alteração_em_Texto
                     using var command = new SQLiteCommand(sql, Connection);
                     command.Parameters.AddWithValue("@Path", value ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Id", Id);
-
-                    int rowsAffected = command.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                    {
-                        _path = value;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Failed to update Path.");
-                    }
+                    if (command.ExecuteNonQuery() > 0) _path = value;
                 }
                 else
                 {
@@ -46,63 +55,97 @@ namespace Monitor_de_Alteração_em_Texto
             }
         }
 
-        public List<TextFileLineInfo>? Lines
-        {
-            get
-            {
-                if (_lines == null && Connection != null && Id > 0)
-                {
-                    _lines = new List<TextFileLineInfo>();
-
-                    string sql = "SELECT Id, TextFileInfoId, LineNumber, Content FROM TextFileLineInfo WHERE TextFileInfoId = @TextFileInfoId ORDER BY LineNumber";
-                    using var command = new SQLiteCommand(sql, Connection);
-                    command.Parameters.AddWithValue("@TextFileInfoId", Id);
-
-                    using var reader = command.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        var line = new TextFileLineInfo(Connection, reader.GetInt32(0));
-                        _lines.Add(line);
-                    }
-                }
-                return _lines;
-            }
-            private set => _lines = value;
-        }
+        public List<TextFileLineInfo>? Lines { get; private set; }
 
         public TextFileInfo(SQLiteConnection connection, int id)
         {
             Id = id;
             Connection = connection;
-            LoadLinesFromTextFileInfo();
+            LoadInfos();
         }
 
-        public TextFileLineInfo GetTextLineInfoByLineNumber(int lineNumber)
+        public void LoadInfos()
         {
-            // Always fetch from the database instead of local cache
-            string query = "SELECT Id, TextFileInfoId, LineNumber, Content FROM TextFileLineInfo WHERE TextFileInfoId = @TextFileInfoId AND LineNumber = @LineNumber";
+            if (Connection == null || Id <= 0)
+                throw new InvalidOperationException("Invalid database connection or record ID.");
+
+            // Load TextFileInfo data (Path)
+            string query = "SELECT Path FROM TextFileInfo WHERE Id = @Id";
+            using (var command = new SQLiteCommand(query, Connection))
+            {
+                command.Parameters.AddWithValue("@Id", Id);
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                    _path = reader.IsDBNull(0) ? null : reader.GetString(0);
+                else
+                    throw new InvalidOperationException("Record not found in the database.");
+            }
+
+            // Load associated lines
+            Lines = LoadLinesFromDatabase();
+        }
+
+        private List<TextFileLineInfo> LoadLinesFromDatabase()
+        {
+            var loadedLines = new List<TextFileLineInfo>();
+            string lineQuery = "SELECT Id FROM TextFileLineInfo WHERE TextFileInfoId = @TextFileId ORDER BY LineNumber";
+            using (var lineCommand = new SQLiteCommand(lineQuery, Connection))
+            {
+                lineCommand.Parameters.AddWithValue("@TextFileId", Id);
+                using var lineReader = lineCommand.ExecuteReader();
+                while (lineReader.Read())
+                {
+                    var line = new TextFileLineInfo(Connection, lineReader.GetInt32(0));
+                    line.LoadInfos();
+                    loadedLines.Add(line);
+                }
+            }
+            return loadedLines;
+        }
+
+        public TextFileLineInfo? GetTextLineInfoByLineNumber(int lineNumber)
+        {
+            string query = "SELECT Id FROM TextFileLineInfo WHERE TextFileInfoId = @TextFileInfoId AND LineNumber = @LineNumber";
             using (var cmd = new SQLiteCommand(query, Connection))
             {
                 cmd.Parameters.AddWithValue("@TextFileInfoId", Id);
                 cmd.Parameters.AddWithValue("@LineNumber", lineNumber);
-
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return new TextFileLineInfo(Connection, reader.GetInt32(0))
-                        {
-                            TextFileInfoId = reader.GetInt32(1),
-                            LineNumber = reader.GetInt32(2),
-                            Content = reader.GetString(3)
-                        };
-                    }
-                }
+                using var reader = cmd.ExecuteReader();
+                if (reader.Read())
+                    return new TextFileLineInfo(Connection, reader.GetInt32(0));
             }
-
-            return null; // Return null if no matching line found
+            return null;
         }
 
+        public List<string> GetLineStrings()
+        {
+            return Lines?.Select(line => line.Content ?? string.Empty).ToList() ?? new List<string>();
+        }
+
+        public HashSet<int> GetLineNumbers()
+        {
+            return Lines == null ? new HashSet<int>() : new HashSet<int>(Lines.Select(line => line.LineNumber));
+        }
+
+        public string GetContent()
+        {
+            LoadInfos();
+            if (Lines == null)
+                throw new InvalidOperationException("Lines collection is not initialized.");
+
+            var content = new StringBuilder();
+            var orderedLines = Lines.OrderBy(line => line.LineNumber).ToList();
+
+            for (int i = 0; i < orderedLines.Count; i++)
+            {
+                var currentLine = orderedLines[i];
+                if (currentLine.Content == null)
+                    continue;
+                content.AppendLine(currentLine.Content);
+            }
+            //content.Remove(content.Length - 2, 2); // Remove the last newline
+            return content.ToString();
+        }
         public TextFileLineInfo CreateTextLineInfo(int lineNumber, string content)
         {
             if (Connection == null)
@@ -159,129 +202,37 @@ namespace Monitor_de_Alteração_em_Texto
 
             return newLine;
         }
-
-
-        public List<string> GetLineStrings()
+        public void DeleteTextFileInfo()
         {
-            if (Lines == null || Lines.Count == 0)
-                return new List<string>(); // Return an empty list if there are no lines
+            if (Connection == null || Id <= 0)
+                throw new InvalidOperationException("Invalid database connection or record ID.");
 
-            return Lines.Select(line => line.Content ?? string.Empty).ToList();
-        }
-        public void KeepThisLinesDeleteRest(List<int> lineNumbers)
-        {
-            // Step 1: Check if the provided List<int> is not empty
-            if (lineNumbers == null || lineNumbers.Count == 0)
+            // Delete associated lines first
+            string deleteLinesQuery = "DELETE FROM TextFileLineInfo WHERE TextFileInfoId = @TextFileInfoId";
+            using (var command = new SQLiteCommand(deleteLinesQuery, Connection))
             {
-                Console.WriteLine("No lines to keep.");
-                return;
-            }
-            if(Connection == null)
-            {
-                throw new InvalidOperationException("Database connection is not set.");
+                command.Parameters.AddWithValue("@TextFileInfoId", Id);
+                command.ExecuteNonQuery();
             }
 
-            // Step 2: Delete lines that are not in the 'lineNumbers' list
-            using (var transaction = Connection.BeginTransaction())
+            // Now delete the TextFileInfo record
+            string deleteFileQuery = "DELETE FROM TextFileInfo WHERE Id = @Id";
+            using (var command = new SQLiteCommand(deleteFileQuery, Connection))
             {
-                try
+                command.Parameters.AddWithValue("@Id", Id);
+                int rowsAffected = command.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
                 {
-                    // Create the DELETE SQL query to remove lines that are not in the 'lineNumbers' list
-                    string deleteQuery = @"
-                    DELETE FROM TextFileLineInfo
-                    WHERE TextFileInfoId = @TextFileId
-                    AND LineNumber NOT IN (" + string.Join(",", lineNumbers) + ")";
-
-                    // Execute the DELETE query
-                    using (var cmd = new SQLiteCommand(deleteQuery, Connection))
-                    {
-                        cmd.Parameters.AddWithValue("@TextFileId", Id);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    // Commit the transaction
-                    transaction.Commit();
+                    // Successfully deleted
+                    _path = null; // Reset the path after deletion
+                    Lines = null; // Clear the lines collection
                 }
-                catch (Exception ex)
+                else
                 {
-                    // Rollback the transaction in case of an error
-                    transaction.Rollback();
-                    Console.WriteLine($"Error: {ex.Message}");
+                    throw new InvalidOperationException("Failed to delete the TextFileInfo record.");
                 }
             }
-
-            // Step 3: Optionally reload the lines from the database to reflect changes
-            LoadLinesFromTextFileInfo(); // Assuming you have a method to reload the lines from the DB
-        }
-        public void LoadLinesFromTextFileInfo()
-        {
-            if (Id == 0 || Connection == null)
-            {
-                throw new InvalidOperationException("Cannot load lines because TextFileInfo is not saved in the database.");
-            }
-
-            List<TextFileLineInfo> existingLines = new();
-
-            string query = "SELECT Id, LineNumber, Content FROM TextFileLineInfo WHERE TextFileInfoId = @TextFileId ORDER BY LineNumber";
-            using (var cmd = new SQLiteCommand(query, Connection))
-            {
-                cmd.Parameters.AddWithValue("@TextFileId", Id);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        existingLines.Add(new TextFileLineInfo(Connection, reader.GetInt32(0))); 
-                        break;
-                    }
-                }
-            }
-
-            Lines = existingLines;
-        }
-
-        public HashSet<int> GetLineNumbers()
-        {
-            if (Lines == null || Lines.Count == 0)
-                return new HashSet<int>(); // Return an empty HashSet if there are no lines
-            return new HashSet<int>(Lines.Select(line => line.LineNumber));
-        }
-
-        // Method to get the content of the text file as a single string
-        public string GetContent()
-        {
-            StringBuilder content = new StringBuilder();
-
-            // Ensure the Lines collection is not null
-            if (Lines == null)
-            {
-                return string.Empty;
-            }
-
-            // Order the lines by LineNumber
-            var orderedLines = Lines.OrderBy(line => line.LineNumber).ToList();
-
-            // Add each line's content to the StringBuilder
-            for (int i = 0; i < orderedLines.Count; i++)
-            {
-                var currentLine = orderedLines[i];
-
-                // If LineNumber 1 and LineNumber 3 are present, add a blank line between them
-                if (currentLine.LineNumber == 1 && i + 1 < orderedLines.Count && orderedLines[i + 1].LineNumber == 3)
-                {
-                    content.AppendLine("");  // Adds a blank line between Line 1 and Line 3
-                }
-
-                // Skip lines that have null or are empty/whitespace
-                if (string.IsNullOrWhiteSpace(currentLine.Content))
-                {
-                    continue;
-                }
-
-                // Add the current line content to the StringBuilder
-                content.AppendLine(currentLine.Content);
-            }
-
-            return content.ToString();
         }
     }
 }

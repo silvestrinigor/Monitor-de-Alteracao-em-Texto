@@ -3,13 +3,14 @@ using System.Linq;
 using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
+using static System.Windows.Forms.LinkLabel;
 
 namespace Monitor_de_Alteração_em_Texto
 {
     public partial class Form1 : System.Windows.Forms.Form
     {
         public TextFileInfo? TextFileInfo { get; set; }
-        public DatabaseManager DataAccess { get; set; } = new DatabaseManager();
+        public DataManager DataAccess { get; set; } = new DataManager();
 
         public Form1()
         {
@@ -27,11 +28,12 @@ namespace Monitor_de_Alteração_em_Texto
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                FilePathTextBox.Text = openFileDialog.FileName;
                 AddLogInfoInTextBox("Arquivo selecionado com sucesso", "INFO");
 
+                FilePathTextBox.Text = openFileDialog.FileName;
+
                 var textFileInfoId = DataAccess.GetTextFileInfoIdByPath(openFileDialog.FileName);
-                if(textFileInfoId == null)
+                if (textFileInfoId == null)
                 {
                     TextFileInfo = DataAccess.CreateTextFileInfo(openFileDialog.FileName);
                     AddLogInfoInTextBox($"Criado e carregado informacoes em banco do arquivo {openFileDialog.FileName}", "DEBUG");
@@ -55,16 +57,14 @@ namespace Monitor_de_Alteração_em_Texto
                 return;
             }
 
-            TextFileInfo.LoadLinesFromTextFileInfo();
-
             string updatedFileContent = File.ReadAllText(FilePathTextBox.Text);
 
             var diffBuilder = new InlineDiffBuilder(new Differ());
-            var diff = diffBuilder.BuildDiffModel(TextFileInfo.GetContent(), updatedFileContent);
-            
+            var diff = diffBuilder.BuildDiffModel(TextFileInfo.GetContent(), updatedFileContent, true);
+
             FileChangeHistoryTextBox.BeginInvoke(new Action(() =>
             {
-                if(!diff.HasDifferences)
+                if (!diff.HasDifferences)
                 {
                     AddLogInfoInTextBox("Nenhuma alteração encontrada", "INFO");
                     return;
@@ -73,15 +73,15 @@ namespace Monitor_de_Alteração_em_Texto
                 FileChangeHistoryTextBox.Clear();
 
                 var linesInUse = new HashSet<int>();
-
+                int lastPosition = 0;
                 foreach (var line in diff.Lines)
                 {
-                    if(line.Position != null)
+                    if (line.Position != null)
                     {
                         linesInUse.Add(line.Position.Value);
-                        AddLogInfoInTextBox($"Linha em uso: {line.Position.Value}", "DEBUG");
+                        AddLogInfoInTextBox($"Line in use {line.Position}", "DEBUG");
                     }
-
+                    TextFileLineInfo? textFileLineInfo;
                     string newLineChangeInfo;
                     switch (line.Type)
                     {
@@ -94,8 +94,9 @@ namespace Monitor_de_Alteração_em_Texto
 
                             if (line.Position != null)
                             {
-                                var textFileLineInfo = TextFileInfo.GetTextLineInfoByLineNumber(line.Position.Value);
-                                if(textFileLineInfo == null)
+                                lastPosition = line.Position.Value;
+                                textFileLineInfo = TextFileInfo.GetTextLineInfoByLineNumber(line.Position.Value);
+                                if (textFileLineInfo == null)
                                 {
                                     textFileLineInfo = TextFileInfo.CreateTextLineInfo(line.Position.Value, line.Text);
                                     AddLogInfoInTextBox("Criado uma informacao de linha de texto no banco", "DEBUG");
@@ -103,9 +104,14 @@ namespace Monitor_de_Alteração_em_Texto
                                 else
                                 {
                                     textFileLineInfo.Content = line.Text;
+                                    AddLogInfoInTextBox("Setado uma informacao de linha de texto no banco", "DEBUG");
 
                                 }
 
+                            }
+                            else
+                            {
+                                throw new Exception("Posição da linha não pode ser nula");
                             }
                             break;
 
@@ -115,6 +121,14 @@ namespace Monitor_de_Alteração_em_Texto
                             FileChangeHistoryTextBox.SelectionStart = FileChangeHistoryTextBox.Text.Length - newLineChangeInfo.Length;
                             FileChangeHistoryTextBox.SelectionLength = newLineChangeInfo.Length;
                             FileChangeHistoryTextBox.SelectionColor = Color.Red;
+                            AddLogInfoInTextBox(lastPosition.ToString(), "DEBUG");
+                            textFileLineInfo = TextFileInfo.GetTextLineInfoByLineNumber(lastPosition + 1);
+                            lastPosition++;
+                            if (textFileLineInfo != null)
+                            {
+                                AddLogInfoInTextBox($"deleting line {textFileLineInfo.LineNumber}, {textFileLineInfo.Content}", "DEBUG");
+                                textFileLineInfo.DeleteLine();
+                            }
                             break;
 
                         default:
@@ -125,34 +139,41 @@ namespace Monitor_de_Alteração_em_Texto
                             FileChangeHistoryTextBox.SelectionColor = Color.Black;
                             if (line.Position != null)
                             {
-                                var textFileLineInfo = TextFileInfo.GetTextLineInfoByLineNumber(line.Position.Value);
+                                lastPosition = line.Position.Value;
+                                textFileLineInfo = TextFileInfo.GetTextLineInfoByLineNumber(line.Position.Value);
                                 if (textFileLineInfo == null)
                                 {
                                     textFileLineInfo = TextFileInfo.CreateTextLineInfo(line.Position.Value, line.Text);
+                                    AddLogInfoInTextBox("Criado uma informacao de linha de texto no banco", "DEBUG");
                                 }
                                 else
                                 {
-                                    textFileLineInfo.Content = line.Text;
+                                    if (textFileLineInfo.Content != line.Text)
+                                    {
+                                        textFileLineInfo.Content = line.Text;
+                                        AddLogInfoInTextBox("Setado uma informacao de linha de texto no banco", "DEBUG");
+                                    }
                                 }
 
                             }
+                            else
+                            {
+                                throw new Exception("Posição da linha não pode ser nula");
+                            }
                             break;
                     }
-
-                    foreach(var oldLine in TextFileInfo.Lines)
-                    {
-                        if (!linesInUse.Contains(oldLine.LineNumber))
-                        {
-                            //oldLine.DeleteLine();
-                            AddLogInfoInTextBox($"Linha deletada do banco: {oldLine.LineNumber}, {oldLine.Content}");
-                        }
-                        
-                    }
-
                     // Reset the selection to avoid highlighting
                     FileChangeHistoryTextBox.SelectionLength = 0;
-                    TextFileInfo.LoadLinesFromTextFileInfo();
-                    //FileChangeHistoryTextBox.Text = TextFileInfo.GetContent();
+                }
+                TextFileInfo.LoadInfos();
+                foreach (var lineInfo in TextFileInfo.Lines)
+                {
+                    if (!linesInUse.Contains(lineInfo.LineNumber))
+                    {
+
+                        AddLogInfoInTextBox($"Line deleted in data {lineInfo.LineNumber}", "DEBUG");
+                        lineInfo.DeleteLine();
+                    }
                 }
             }));
             AddLogInfoInTextBox("Verificação de alterações realizada com sucesso", "INFO");
@@ -167,6 +188,17 @@ namespace Monitor_de_Alteração_em_Texto
             {
                 LogsTextBox.AppendText(formattedLog + Environment.NewLine);
             }));
+        }
+
+        private void OnCleanTableButtonClick(object sender, EventArgs e)
+        {
+            if(TextFileInfo != null)
+            {
+                TextFileInfo.DeleteTextFileInfo();
+                FilePathTextBox.Text = "";
+                TextFileInfo = null;
+                AddLogInfoInTextBox("Todas as linhas do arquivo foram deletadas", "DEBUG");
+            }
         }
     }
 }

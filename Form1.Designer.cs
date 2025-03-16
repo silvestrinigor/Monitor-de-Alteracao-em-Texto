@@ -36,6 +36,7 @@
             TimerToVerifyFile = new System.Windows.Forms.Timer(components);
             label2 = new Label();
             LogsTextBox = new RichTextBox();
+            button1 = new Button();
             SuspendLayout();
             // 
             // SelectFileButton
@@ -56,10 +57,10 @@
             FilePathTextBox.Size = new Size(654, 23);
             FilePathTextBox.TabIndex = 1;
             // 
-            // FileChangeHistory
+            // FileChangeHistoryTextBox
             // 
             FileChangeHistoryTextBox.Location = new Point(134, 42);
-            FileChangeHistoryTextBox.Name = "FileChangeHistory";
+            FileChangeHistoryTextBox.Name = "FileChangeHistoryTextBox";
             FileChangeHistoryTextBox.ReadOnly = true;
             FileChangeHistoryTextBox.Size = new Size(654, 247);
             FileChangeHistoryTextBox.TabIndex = 2;
@@ -98,18 +99,29 @@
             LogsTextBox.TabIndex = 5;
             LogsTextBox.Text = "";
             // 
-            // Form
+            // button1
+            // 
+            button1.Location = new Point(12, 415);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 6;
+            button1.Text = "button1";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += OnCleanTableButtonClick;
+            // 
+            // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(button1);
             Controls.Add(LogsTextBox);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(FileChangeHistoryTextBox);
             Controls.Add(FilePathTextBox);
             Controls.Add(SelectFileButton);
-            Name = "Form";
+            Name = "Form1";
             Text = "Monitor de Alteração em Texto";
             ResumeLayout(false);
             PerformLayout();
@@ -124,5 +136,6 @@
         private System.Windows.Forms.Timer TimerToVerifyFile;
         private Label label2;
         private RichTextBox LogsTextBox;
+        private Button button1;
     }
 }
