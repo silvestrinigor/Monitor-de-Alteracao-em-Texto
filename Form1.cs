@@ -19,7 +19,7 @@ namespace Monitor_de_Alteração_em_Texto
 
         private void OnSelectFileButtonClick(object sender, EventArgs e)
         {
-            AddLogInfoInTextBox("Botao de selecionar arquivo precionado", "DEBUG");
+            AddLogInfoInTextBox("Botao de selecionar arquivo pressionado", "DEBUG");
 
             using OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Arquivos de texto (*.txt)|*.txt";
@@ -200,7 +200,7 @@ namespace Monitor_de_Alteração_em_Texto
 
         private void OnCleanTableButtonClick(object sender, EventArgs e)
         {
-            if(TextFileInfo != null)
+            if (TextFileInfo != null)
             {
                 FileChangeHistoryTextBox.Clear();
                 TextFileInfo.DeleteTextFileInfo();
@@ -208,6 +208,26 @@ namespace Monitor_de_Alteração_em_Texto
                 TextFileInfo = null;
                 AddLogInfoInTextBox("Todas as linhas do arquivo foram deletadas", "DEBUG");
             }
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
