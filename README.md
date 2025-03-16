@@ -30,6 +30,8 @@ A versão mais recente pode ser baixada em [Releases](https://github.com/silvest
 2.  Extraia os arquivos.
     
 3.  Execute `setup.exe` para iniciar a instalação.
+
+4.  Após a instalação, execute o programa pelo atalho criado no desktop (Se não funcionar, execute como Administrador).
     
 
 * * *
