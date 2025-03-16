@@ -1,6 +1,6 @@
 # Monitor de Alteração em Texto
 
-Este projeto monitora alterações em um arquivo de texto e salva as modificações em um banco de dados SQLite.
+Monitora alterações em um arquivo de texto e salva as modificações em um banco de dados SQLite.
 
 ![img1](https://github.com/silvestrinigor/Monitor-de-Alteracao-em-Texto/blob/master/Exemplo%20de%20uso.png)
 
