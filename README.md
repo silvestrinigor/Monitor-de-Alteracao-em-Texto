@@ -12,7 +12,7 @@ Este projeto faz parte de um **desafio técnico** para avaliação de habilidade
 
 ## 📝 Instalação
 
-A versão mais recente pode ser baixada na [MIT License](https://github.com/silvestrinigor/Monitor-de-Alteracao-em-Texto/blob/master/LICENSE.txt)..
+A versão mais recente pode ser baixada em [releases](https://github.com/silvestrinigor/Monitor-de-Alteracao-em-Texto/releases/tag/release)..
 
 ### Requisitos
 
