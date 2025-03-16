@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace Monitor_de_Alteração_em_Texto
 {
     internal static class Program

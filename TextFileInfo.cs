@@ -1,16 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using System.Data.SQLite;
-using DiffPlex;
-using DiffPlex.DiffBuilder;
-using DiffPlex.DiffBuilder.Model;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Monitor_de_Alteração_em_Texto
 {

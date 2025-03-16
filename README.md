@@ -32,7 +32,22 @@ A versão mais recente pode ser baixada em [Releases](https://github.com/silvest
 3.  Execute `setup.exe` para iniciar a instalação.
 
 4.  Após a instalação, execute o programa pelo atalho criado no desktop (Se não funcionar, execute como Administrador).
-    
+
+
+* * *
+
+## 📌 Dependências
+
+Este projeto utiliza as seguintes dependências:
+
+### ⚙️ Frameworks
+- `Microsoft.NETCore.App`
+- `Microsoft.WindowsDesktop.App.WindowsForms`
+
+### 📦 Pacotes
+- [`DiffPlex`](https://www.nuget.org/packages/DiffPlex/) (1.7.2) - Biblioteca para comparação de diferenças em texto.
+- [`System.Data.SQLite`](https://www.nuget.org/packages/System.Data.SQLite/) (1.0.119) - Suporte para SQLite no .NET.
+
 
 * * *
 

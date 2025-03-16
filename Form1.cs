@@ -1,9 +1,6 @@
-using System.IO;
-using System.Linq;
 using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
-using static System.Windows.Forms.LinkLabel;
 
 namespace Monitor_de_Alteração_em_Texto
 {
